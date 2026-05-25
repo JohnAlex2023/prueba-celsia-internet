@@ -1,149 +1,111 @@
-# Prueba Celsia Internet — Desarrollo y Operaciones Aplicaciones III
-Solución completa de la prueba técnica: backend, frontend **Celsia Internet S.A.S.**
+# 1. PRUEBA TÉCNICA DESARROLLO
 
-## Tabla de contenido
+## DESCRIPCIÓN DEL PROBLEMA
 
-- [Stack tecnológico](#stack-tecnológico)
-- [Estructura del repositorio](#estructura-del-repositorio)
-- [Cómo ejecutar](#cómo-ejecutar)
-- [Modelo de datos](#modelo-de-datos)
-- [Git Flow](#git-flow)
-- [Parte 2 — Prueba teórico-práctica](#parte-2--prueba-teórico-práctica)
-- [Parte 3 — Redes](#parte-3--redes)
+La empresa Celsia Internet S.A.S. requiere implementar una solución para su proceso de venta que permita la captura de información de los clientes y la contratación de uno o varios servicios del portafolio de internet.
 
----
+El ejercicio consiste en implementar un backend y frontend con su configuración de despliegue en contenedores, para el registro y consulta de la información de los servicios contratados por los clientes, de acuerdo con el modelo de datos presentado a continuación.
+## MODELO DE DATOS
 
-## Stack tecnológico
+Las tablas donde se almacena la información son las siguientes:
 
-| Capa | Tecnología | Justificación |
-|---|---|---|
-| Frontend | React 18 + TypeScript + Vite | SPA moderna, tipado estricto, hot-reload |
-| Backend | Node.js 20 + Express + TypeScript | Stack ampliamente adoptado, arquitectura limpia |
-| ORM | TypeORM | Patrón Repository nativo, decoradores, migraciones |
-| DB | MySQL 8 | Solicitado, motor maduro con buena integridad referencial |
-| Contenedores | Docker + docker-compose | Despliegue reproducible |
-| Servidor estático | Nginx (alpine) | Servir el bundle de producción |
+```console
+CREATE TABLE clientes {
+  identificacion VARCHAR(20) NOT NUL PRIMARY KEY,
+  nombres VARCHAR(80) NOT NULL,
+  apellidos VARCHAR(80) NOT NULL,
+  tipoIdentificacion VARCHAR(2) NOT NULL,
+  fechaNacimiento DATE NOT NULL,
+  numeroCelular VARCHAR(20) NOT NULL,
+  correoElectronico VARCHAR(80) NOT NULL
+};
 
-## Estructura del repositorio
 
-```
-prueba-celsia-internet/
-├── api/                    # Backend Node + Express + TypeORM
-│   ├── src/
-│   │   ├── config/         # DataSource (Singleton)
-│   │   ├── entities/       # Cliente, Servicio
-│   │   ├── repositories/   # Patrón Repository
-│   │   ├── services/       # Lógica de negocio
-│   │   ├── controllers/    # HTTP handlers
-│   │   ├── routes/         # Rutas REST
-│   │   ├── middlewares/    # Validaciones y manejo de errores
-│   │   ├── dtos/           # Data Transfer Objects
-│   │   └── server.ts
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── README.md
-├── webapp/                 # Frontend React + Vite
-│   ├── src/
-│   │   ├── api/            # Cliente HTTP (axios)
-│   │   ├── components/     # Reutilizables (Forms, Navbar, Alert)
-│   │   ├── pages/          # Vistas conectadas a rutas
-│   │   ├── hooks/          # Custom hooks
-│   │   └── types/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── docker-compose.yml
-│   └── README.md
-├── assets/
-│   └── diagrama.png        # Diagrama de componentes
-├── docker-compose.yml      # Stack completo (DB + API + Webapp)
-└── README.md               # Este archivo
-```
-
-## Cómo ejecutar
-
-### Opción A — Stack completo (recomendado)
-
-Desde la raíz del repositorio:
-
-```bash
-docker compose up --build
-```
-
-Esto levanta los 3 servicios:
-
-| Servicio | Puerto | URL |
-|---|---|---|
-| Frontend (Nginx) | 8080 | http://localhost:8080 |
-| Backend (Express) | 3000 | http://localhost:3000/api/v1 |
-| MySQL | 3307 | `mysql://celsia:celsia123@localhost:3307/celsia_internet` |
-
-### Opción B — Servicios por separado
-
-Ver `api/README.md` y `webapp/README.md`.
-
-## Modelo de datos
-
-```sql
-CREATE TABLE clientes (
-  identificacion       VARCHAR(20) NOT NULL PRIMARY KEY,
-  nombres              VARCHAR(80) NOT NULL,
-  apellidos            VARCHAR(80) NOT NULL,
-  tipoIdentificacion   VARCHAR(2)  NOT NULL,
-  fechaNacimiento      DATE        NOT NULL,
-  numeroCelular        VARCHAR(20) NOT NULL,
-  correoElectronico    VARCHAR(80) NOT NULL
-);
-
-CREATE TABLE servicios (
-  identificacion       VARCHAR(20) NOT NULL,
-  servicio             VARCHAR(80) NOT NULL,
-  fechaInicio          DATE        NOT NULL,
-  ultimaFacturacion    DATE        NOT NULL,
-  ultimoPago           INTEGER     NOT NULL DEFAULT 0,
+CREATE TABLE servicios {
+  identificacion VARCHAR(20) NOT NUL,
+  servicio VARCHAR(80) NOT NUL,
+  fechaInicio DATE NOT NULL,
+  ultimaFacturacion DATE NOT NULL,
+  ultimoPago INTEGER NOT NUL DEFAULT 0,
   PRIMARY KEY (identificacion, servicio),
-  CONSTRAINT servicios_FK1 FOREIGN KEY (identificacion)
-    REFERENCES clientes(identificacion)
-    ON UPDATE CASCADE ON DELETE NO ACTION
-);
+  CONSTRAINT servicios_FK1 FOREING KEY (identificacion) REFERENCES clientes(identificacion) ON UPDATE CASCADE ON DELETE NO ACTION
+}
 ```
 
-TypeORM crea estas tablas automáticamente con `synchronize: true` en el primer arranque. En un entorno productivo se usarían migraciones (`typeorm migration:run`).
+Para la prueba se deben crear las tablas en el motor de base de datos de su preferencia. Sobre esta base se deben almacenar los registros de los clientes y servicios que se especifican para la prueba.
 
-## Git Flow
+## Puntos de la prueba
 
-Estrategia de ramas solicitada:
+1.1. Implemente en el lenguaje de su preferencia, una `CRUD (Create, Read, Update and Delete)` que permita capturar y administrar la información de los clientes y sus servicios.
+
+1.2. Se deben realizar las siguientes validaciones:
+
+- No dejar datos en blanco.
+- El tipo de dato, de acuerdo con la estructura en la base de datos.
+- Si el registro ya existe muestre el mensaje `“El registro ya existe”`.
+
+  1.3. Implementar un formulario que permita registrar los servicios contratados de los clientes. `Nota: Tener en cuenta integridad referencial.`
+
+  1.4. Implementar un formulario para la consulta por número de identificación, la información de un cliente y los servicios que tiene contratados.
+
+TIPS:
+
+a. Para el campo `tipoIdentificacion` ingresar solamente los siguientes valores:
+
+- CEDULA → CC
+- TARJETA IDENTIDAD → TI
+- CEDULA EXTRANJERIA → CE
+- REGISTRO CIVIL → RC
+
+b. Para el campo `servicio` ingresar solamente los siguientes tipos:
+
+- Internet 200 MB
+- Internet 400 MB
+- Internet 600 MB
+- Directv Go
+- Paramount+
+- Win+
+
+c. Se evaluará el uso de patrones de diseño, en backend y frontend, la configuración de despliegue en contenedores y de la imagen a desplegar.
+
+d. En el docker-compose se debe incluir la configuración del servicio de base de datos que haya escogido y una política de manejo de logs para cada servicio.
+
+## ENTREGABLE
+
+Se espera como resultado un clone del repositorio `https://github.com/celsia-internet/pruebas.git`, con la siguiente estructura.
 
 ```
-main                          ← producción / versiones liberadas
-└── develop                   ← integración continua
-    └── <desarrollador>       ← rama personal de cada dev
+api/
+|-- docker-compose.yml
+|-- Dockerfile
+|-- README.md
+|-- ...
+webapp/
+|-- docker-compose.yml
+|-- Dockerfile
+|-- README.md
+|-- ...
 ```
 
-Comandos para inicializar:
+El repositorio de la prueba deberá estar publicado en `github` de manera pública con el nombre `prueba-celsia-internet` usando git-flow por desarrollador.
 
-```bash
-git init
-git add .
-git commit -m "feat: initial commit"
-git branch -M main
-git checkout -b develop
-git checkout -b <tu-usuario>     # ej: git checkout -b jperez
-git remote add origin https://github.com/<tu-usuario>/prueba-celsia-internet.git
-git push -u origin <tu-usuario>
+```
+main/
+|-- develop
+||-- <desarrollador>
 ```
 
----
+# 2. PRUEBA TEORICO-PRACTICA
 
-# Parte 2 — Prueba teórico-práctica
+Para el desarrollo de la prueba teórica, tendrás que escribir tus respuestas en el archivo README.md del repositorio, tomando como referencia la aplicación desarrollada en la `PRUEBA TÉCNICA DE DESARROLLO`.
 
-## 2.1. Diagrama de componentes
+## PREGUNTAS
 
-Ver `./assets/diagrama.png`.
+ 2.1. Elabore un diagrama de componentes de la aplicación. Debe cargar el archivo en la siguiente ruta del repositorio: `./assets/diagrama.png`
 
-![Diagrama de Componentes](./assets/diagrama.png)
 
 **RTA:**
-
+<img src="./assets/diagrama.png" alt="Diagrama" width="400">
 
 1. El usuario abre el navegador y usa el frontend React.
 2. El frontend llama al backend Express por la API.
@@ -152,9 +114,9 @@ Ver `./assets/diagrama.png`.
 
 En el backend separé responsabilidades en capas para que el código sea fácil de entender y mantener.
 
-## 2.2. Mecanismos de seguridad
+ 2.2. ¿Qué mecanismos de seguridad incluirías en la aplicación para garantizar la protección del acceso a los datos?
 
-**RTA:**
+- RTA: 
 
 En esta prueba no había login, así que la app quedó sin autenticación para no complicar el alcance. Lo que sí hice fue aplicar seguridad básica:
 
@@ -163,18 +125,16 @@ En esta prueba no había login, así que la app quedó sin autenticación para n
 - CORS limitado a los orígenes del frontend.
 - React ayuda a evitar XSS porque no inyecta HTML sin control.
 
+  2.2. ¿Qué mecanismos de seguridad incluirías en la aplicación para garantizar la protección del acceso a los datos?
+- RTA:
 
-- Autenticación con JWT o una sesión mínima.
-- Roles simples (por ejemplo, vendedor y administrador).
-- HTTPS obligatorio.
-- Variables sensibles en un gestor de secretos, no en el compose.
-- Un usuario de base de datos con permisos mínimos, no `root`.
-- No exponer MySQL hacia internet.
-- Backups periódicos y protección extra para datos personales.
+Para proteger el acceso a los datos implementaría autenticación y autorización usando JWT, permitiendo validar la identidad de los usuarios antes de acceder a la aplicación. También aplicaría validaciones de datos tanto en frontend como backend para evitar datos inválidos o ataques de inyección SQL. Las contraseñas se almacenarían cifradas usando bcrypt y la comunicación entre cliente y servidor se realizaría mediante HTTPS. Adicionalmente, limitaría el acceso a la base de datos únicamente desde el backend y configuraría variables de entorno para proteger información sensible como credenciales y claves secretas.
 
-## 2.3. Estrategia de escalabilidad para 1,000,000 de clientes/año
+ 2.3. ¿Qué estrategia de escalabilidad recomendarías para la aplicación considerando que el crecimiento proyectado será de 1,000,000 de clientes por año?
 
-**RTA:**
+- RTA:
+
+Para soportar un crecimiento de 1,000,000 de clientes por año recomendaría una arquitectura escalable basada en contenedores usando Docker. Inicialmente podría manejarse como un monolito bien estructurado, pero preparado para evolucionar a microservicios si el volumen aumenta.
 
 Para mí, la idea clave es dividir la carga en capas:
 
@@ -183,48 +143,39 @@ Para mí, la idea clave es dividir la carga en capas:
 - Los catálogos fijos se pueden cachear en memoria o en Redis.
 - Las tareas que no necesitan respuesta inmediata se pueden sacar a una cola.
 
-En un primer paso, yo recomendaría:
+Con esta estrategia, la aplicación puede crecer horizontalmente agregando más instancias de backend y escalando la base de datos según sea necesario. Además, el uso de contenedores facilita el despliegue y la gestión de la infraestructura a medida que la demanda aumenta.
 
-- 2 o 3 réplicas del API.
-- MySQL con réplica de lectura.
-- Cache para datos que casi no cambian.
+ 2.4. ¿Qué patrón o patrones de diseño recomendarías para esta solución y cómo se implementarían? (Justifique)
 
-Luego, si crece más:
+- RTA:
 
-- aumentar réplicas del API,
-- usar caché en consultas por identificación,
-- archivar servicios antiguos o cancelados.
+Para esta solución usaría principalmente el patrón MVC (Modelo-Vista-Controlador). Este patrón permite separar la lógica de negocio, la interfaz de usuario y el acceso a datos, haciendo la aplicación más organizada y fácil de mantener. El modelo manejaría la interacción con la base de datos, el controlador procesaría las peticiones y reglas del negocio, y la vista mostraría la información al usuario.
 
-Si llegara a ser muy grande, consideraría particionar tablas y monitorear consultas lentas.
-
-## 2.4. Patrones de diseño recomendados
-
-**RTA:**
+También implementaría el patrón Repository en el backend para desacoplar la lógica de acceso a datos. De esta forma, si en un futuro cambia el motor de base de datos, la lógica principal de la aplicación no tendría grandes modificaciones.
 
 En este proyecto usé patrones básicos porque me ayudan a escribir código ordenado:
 
-- **Repository:** para separar el acceso a datos de la lógica de negocio.
-- **Service Layer:** para tener la lógica en un solo lugar y no mezclarla con HTTP.
-- **DTO:** para definir claramente qué datos entran y salen del API.
-- **Adapter:** en el frontend uso un cliente HTTP que oculta axios al resto de la app.
-- **Singleton:** en el `AppDataSource` del backend hay una sola conexión/pool.
-- **Middleware:** en Express uso validación y manejo de errores antes del controller.
+- Repository: para separar el acceso a datos de la lógica de negocio.
+- Service Layer: para tener la lógica en un solo lugar y no mezclarla con HTTP.
+- Adapter: en el frontend uso un cliente HTTP que oculta axios al resto de la app.
+- Singleton: en el `AppDataSource` del backend hay una sola conexión/pool.
+- Middleware: en Express uso validación y manejo de errores antes del controller.
 
 Creo que estos patrones son suficientes para esta prueba y ayudan a que el código sea más fácil de cambiar después.
 
-## 2.5. Optimización del manejo y persistencia de datos (alta transaccionalidad)
+  2.5. ¿Qué recomendaciones harías para optimizar el manejo y la persistencia de datos de la aplicación, teniendo en cuenta que esta aplicación tiene una alta transaccionalidad?
 
-**RTA:**
+- RTA:
 
 Pienso que esta app debe ser clara en la base de datos y en las operaciones.
 
-- El modelo está normalizado: `clientes` y `servicios` separados con FK.
-- La tabla `servicios` usa PK compuesta para evitar duplicados.
-- Uso `DATE` e `INT` donde corresponde.
+- El modelo está normalizado: clientes y servicios separados con FK.
+- La tabla servicios usa PK compuesta para evitar duplicados.
+- Uso DATE e INT donde corresponde.
 - Las operaciones que tocan varias tablas deben ir en transacciones cortas.
 - Un pool de conexiones bien configurado evita saturar MySQL.
 - Para consultas frecuentes, sería bueno cachear los resultados.
-- También es importante activar slow query log y revisar los `EXPLAIN` cuando algo ande lento.
+- También es importante activar slow query log y revisar los EXPLAIN cuando algo ande lento.
 - Si se acumulan muchos datos viejos, se pueden archivar en tablas aparte.
 
 En resumen: base de datos ordenada, validación, control de duplicados, caché para lecturas y monitoreo.
@@ -233,69 +184,54 @@ En resumen: base de datos ordenada, validación, control de duplicados, caché p
 
 # Parte 3 — Redes
 
-## 3.1. Diferencia entre router y switch. ¿Cuándo usarías cada uno?
+ 3.1. Explica la diferencia entre un router y un switch. ¿Cuándo usarías cada uno?
 
-**RTA:**
+- RTA:
+Un switch se utiliza para conectar dispositivos dentro de una misma red local, por ejemplo computadores, impresoras o servidores en una oficina. Su función principal es enviar datos entre equipos usando direcciones MAC.
 
-Un **switch** conecta equipos dentro de la misma red local. Trabaja con direcciones MAC y es útil para conectar PCs, impresoras y servidores en la misma oficina.
+Por otro lado, un router se usa para conectar diferentes redes entre sí, por ejemplo una red local con internet. El router trabaja con direcciones IP y decide cuál es la mejor ruta para enviar la información. Usaría un switch para comunicación interna dentro de una LAN y un router cuando necesite comunicación entre redes diferentes.
 
-Un **router** conecta redes diferentes. Trabaja con direcciones IP y sirve para unir la LAN con internet o separar subredes.
+  3.2. Describe las siete capas del modelo OSI y menciona brevemente la función principal de cada una
 
-Normalmente en una red uso switch para el interior y router para la salida hacia otras redes o internet.
+- RTA:
+El modelo OSI está compuesto por siete capas:
 
-## 3.2. Las siete capas del modelo OSI
+Capa Física: transmite bits a través del medio físico como cables o señales inalámbricas.
 
-**RTA:**
+Capa de Enlace de Datos: organiza la transmisión de datos entre dispositivos de la misma red y maneja direcciones MAC.
 
-El modelo OSI divide la comunicación en 7 capas. De abajo hacia arriba:
+Capa de Red: administra direcciones IP y el enrutamiento de paquetes.
 
-| # | Capa | Para qué sirve | Ejemplos |
-|---|------|----------------|----------|
-| 1 | Física | Cable y señales | UTP, fibra óptica |
-| 2 | Enlace | Conecta equipos en la LAN | Ethernet, MAC |
-| 3 | Red | Enruta paquetes | IP |
-| 4 | Transporte | Manda datos confiables o rápidos | TCP, UDP |
-| 5 | Sesión | Mantiene la conexión entre apps | Sesiones |
-| 6 | Presentación | Formato y cifrado | TLS, JSON |
-| 7 | Aplicación | Lo que usa el usuario | HTTP, DNS |
+Capa de Transporte: garantiza la entrega correcta de datos mediante protocolos como TCP y UDP.
 
+Capa de Sesión: administra la apertura, mantenimiento y cierre de conexiones.
+
+Capa de Presentación: traduce, comprime o cifra la información para que pueda ser entendida.
+
+Capa de Aplicación: permite la interacción directa entre aplicaciones y usuarios mediante servicios como HTTP, FTP o SMTP.
 
 
-## 3.3. Diferencias entre TCP y UDP. Ejemplos de cuándo usar cada uno
+  3.3. Explica las diferencias entre los protocolos TCP y UDP. Dar un ejemplo de cuándo usarías cada uno?
 
-**RTA:**
+- RTA:
+TCP es un protocolo orientado a conexión, lo que significa que verifica la entrega correcta de los datos y garantiza confiabilidad. Es más seguro para aplicaciones donde perder información no es aceptable. Un ejemplo de uso sería una aplicación bancaria o una página web.
 
-**TCP** es confiable y ordenado. Si hay pérdida de datos, se retransmite. Lo usaría para esta app (HTTP/HTTPS), MySQL y transferencias donde no se puede perder información.
+UDP es un protocolo más rápido porque no verifica si todos los datos llegaron correctamente. Se usa en aplicaciones donde la velocidad es más importante que la confiabilidad total. Un ejemplo sería streaming de video, videojuegos en línea o videollamadas.
 
-**UDP** es más rápido pero no garantiza entrega ni orden. Sirve para streaming, llamadas en vivo o juegos, donde es mejor recibir algo rápido aunque se pierdan paquetes.
+  3.4. ¿Qué es una máscara de subred y cómo se utiliza para dividir una red en subredes más pequeñas?
 
-Así que mi regla práctica es: si necesito seguridad, TCP; si necesito velocidad, UDP.
+- RTA:
+Una máscara de subred es un valor que permite identificar qué parte de una dirección IP pertenece a la red y qué parte pertenece a los hosts. Se utiliza para dividir una red grande en varias subredes más pequeñas, facilitando una mejor administración, organización y aprovechamiento de direcciones IP.
 
-## 3.4. ¿Qué es una máscara de subred y cómo se utiliza para dividir una red en subredes más pequeñas?
+Por ejemplo, una red puede dividirse por departamentos o áreas de una empresa para reducir tráfico y mejorar seguridad dentro de la infraestructura.
 
-**RTA:**
+  3.5. ¿Puedes mencionar algunos protocolos de enrutamiento dinámico y explicar brevemente cómo funcionan?
 
-La máscara de subred indica qué parte de la IP es la red y qué parte es el host. Por ejemplo, `192.168.1.45/24` significa que la red es `192.168.1.0`.
+- RTA:
+Algunos protocolos de enrutamiento dinámico son RIP, OSPF y EIGRP.
 
-Para dividir una red grande se usan máscaras más largas, como pasar de `/24` a `/26`. Eso crea redes más pequeñas y ayuda a separar áreas como ventas, TI o administración.
+RIP selecciona rutas usando la cantidad de saltos como métrica, siendo sencillo pero limitado en redes grandes. OSPF calcula la mejor ruta usando el costo del enlace y tiene mejor rendimiento en infraestructuras grandes y complejas. EIGRP combina velocidad y eficiencia, calculando rutas óptimas y permitiendo convergencia rápida.
 
-## 3.5. Protocolos de enrutamiento dinámico
+Estos protocolos permiten que los routers compartan automáticamente información de rutas sin necesidad de configurar manualmente cada camino de la red.
 
-**RTA:**
-
-Los protocolos dinámicos permiten que los routers aprendan rutas solos.
-
-- **RIP:** sencillo y fácil, pero lento para redes grandes.
-- **OSPF:** más usado en empresas, funciona bien con topologías más grandes.
-- **EIGRP:** típico de Cisco, converge rápido.
-- **BGP:** se usa entre proveedores de internet.
-
-Para una empresa como Celsia yo diría que OSPF es buena opción dentro de la red propia y BGP para conectarse con otros ISPs.
-
----
-
-## Autor
-
-Desarrollado como prueba técnica para **Celsia Internet S.A.S.**
-
-> *El objetivo de esta prueba es evaluar conocimiento, capacidad de adaptabilidad y habilidad para resolver problemas.*
+### Por último, y no menos importante, te deseamos mucha suerte y esperamos que disfrutes haciendo la prueba. El objetivo es evaluar tu conocimiento, capacidad de adaptabilidad y habilidad para resolver problemas.
