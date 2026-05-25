@@ -1,6 +1,5 @@
 # Prueba Celsia Internet — Desarrollo y Operaciones Aplicaciones III
-
-Solución completa de la prueba técnica: backend, frontend y configuración de despliegue en contenedores para la gestión de clientes y servicios de internet de **Celsia Internet S.A.S.**
+Solución completa de la prueba técnica: backend, frontend **Celsia Internet S.A.S.**
 
 ## Tabla de contenido
 
@@ -145,7 +144,6 @@ Ver `./assets/diagrama.png`.
 
 **RTA:**
 
-Como recién graduado, hice una solución clara y sencilla:
 
 1. El usuario abre el navegador y usa el frontend React.
 2. El frontend llama al backend Express por la API.
@@ -165,7 +163,6 @@ En esta prueba no había login, así que la app quedó sin autenticación para n
 - CORS limitado a los orígenes del frontend.
 - React ayuda a evitar XSS porque no inyecta HTML sin control.
 
-Si esto fuera un proyecto real, como recién graduado propondría agregar:
 
 - Autenticación con JWT o una sesión mínima.
 - Roles simples (por ejemplo, vendedor y administrador).
@@ -262,7 +259,7 @@ El modelo OSI divide la comunicación en 7 capas. De abajo hacia arriba:
 | 6 | Presentación | Formato y cifrado | TLS, JSON |
 | 7 | Aplicación | Lo que usa el usuario | HTTP, DNS |
 
-Yo lo uso como referencia para saber si un problema es de red, de transporte o de la aplicación.
+
 
 ## 3.3. Diferencias entre TCP y UDP. Ejemplos de cuándo usar cada uno
 
