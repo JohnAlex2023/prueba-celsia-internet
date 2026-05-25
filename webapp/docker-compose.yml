@@ -1,0 +1,30 @@
+version: "3.9"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+    labels: "service"
+
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api/v1}
+    container_name: celsia_webapp
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      - celsia_net
+    labels:
+      service: "webapp"
+    logging: *default-logging
+
+networks:
+  celsia_net:
+    external: true
+    name: api_celsia_net

@@ -1,0 +1,87 @@
+version: "3.9"
+
+# Política de logs centralizada (driver json-file con rotación)
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+    labels: "service"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: celsia_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: celsia_internet
+      MYSQL_USER: celsia
+      MYSQL_PASSWORD: celsia123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ucelsia", "-pcelsia123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - celsia_net
+    labels:
+      service: "mysql"
+    logging: *default-logging
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: celsia_api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: celsia
+      DB_PASSWORD: celsia123
+      DB_NAME: celsia_internet
+      CORS_ORIGIN: http://localhost:8080,http://localhost:5173
+    ports:
+      - "3000:3000"
+    networks:
+      - celsia_net
+    labels:
+      service: "api"
+    logging: *default-logging
+
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000/api/v1
+    container_name: celsia_webapp
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    networks:
+      - celsia_net
+    labels:
+      service: "webapp"
+    logging: *default-logging
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  celsia_net:
+    driver: bridge
