@@ -13,11 +13,11 @@ Frontend SPA para la gestión de clientes y servicios de internet.
 
 ## Funcionalidades
 
-- 📋 **Listado** de clientes registrados con acciones de editar/eliminar.
-- ➕ **Registrar nuevo cliente** con validaciones en vivo (campos vacíos, formato de correo, tipo de identificación).
-- ✏️ **Editar cliente** existente (la identificación queda inmutable).
-- 🛒 **Contratar servicio** asociándolo a un cliente existente (valida integridad referencial vía API).
-- 🔎 **Consultar por identificación**: muestra los datos del cliente y todos sus servicios contratados, con opción de editar o cancelar servicios.
+- **Listado** de clientes registrados con acciones de editar/eliminar.
+- **Registrar nuevo cliente** con validaciones en vivo (campos vacíos, formato de correo, tipo de identificación).
+- **Editar cliente** existente (la identificación queda inmutable).
+- **Contratar servicio** asociándolo a un cliente existente (valida integridad referencial vía API).
+- **Consultar por identificación**: muestra los datos del cliente y todos sus servicios contratados, con opción de editar o cancelar servicios.
 
 ## Patrones de diseño aplicados
 
